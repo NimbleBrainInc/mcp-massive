@@ -1,0 +1,79 @@
+{
+  "manifest_version": "0.4",
+  "name": "@nimblebraininc/mcp-massive",
+  "version": "0.1.0",
+  "description": "Financial market data, technical indicators, and SEC filings MCP service powered by Massive API",
+  "author": {
+    "name": "NimbleBrain Inc",
+    "email": "hello@nimblebrain.ai"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NimbleBrainInc/mcp-massive"
+  },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "Massive API Key",
+      "description": "Your Massive API key from https://massive.com/dashboard/api-keys",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "server": {
+    "type": "python",
+    "entry_point": "mcp_massive.server",
+    "mcp_config": {
+      "command": "python",
+      "args": [
+        "-m",
+        "mcp_massive.server"
+      ],
+      "env": {
+        "MASSIVE_API_KEY": "${user_config.api_key}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "get_candles",
+      "description": "Get OHLCV price candles for a ticker over a date range"
+    },
+    {
+      "name": "get_snapshot",
+      "description": "Get current price snapshot and day stats for a ticker"
+    },
+    {
+      "name": "get_technical_indicator",
+      "description": "Get technical indicator (SMA, EMA, RSI, MACD) for a ticker"
+    },
+    {
+      "name": "get_sec_filing",
+      "description": "Search SEC filings for a ticker"
+    },
+    {
+      "name": "get_sec_filing_section",
+      "description": "Read a specific section of an SEC filing (AI-parsed text)"
+    },
+    {
+      "name": "get_ticker_details",
+      "description": "Get company reference data for a ticker"
+    },
+    {
+      "name": "get_top_movers",
+      "description": "Get top gaining or losing stocks"
+    }
+  ],
+  "_meta": {
+    "org.mpaktrust": {
+      "mtf_version": "0.1",
+      "permissions": {
+        "filesystem": "none",
+        "network": "outbound",
+        "environment": "read",
+        "subprocess": "none",
+        "native": "none"
+      }
+    }
+  }
+}
