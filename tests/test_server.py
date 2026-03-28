@@ -270,18 +270,22 @@ async def test_get_sec_filing_with_mock(mock_get, mcp_server):
     mock_resp.json.return_value = {
         "results": [
             {
-                "id": "filing_001",
                 "ticker": "AAPL",
+                "issuer_name": "Apple Inc.",
+                "form_type": "10-K",
                 "filing_date": "2026-02-01",
-                "type": "10-K",
-                "source_filing_url": "https://sec.gov/filing/001",
+                "accession_number": "0000320193-26-000001",
+                "filing_url": "https://sec.gov/filing/001",
+                "cik": "0000320193",
             },
             {
-                "id": "filing_002",
                 "ticker": "AAPL",
+                "issuer_name": "Apple Inc.",
+                "form_type": "10-Q",
                 "filing_date": "2025-11-01",
-                "type": "10-Q",
-                "source_filing_url": "https://sec.gov/filing/002",
+                "accession_number": "0000320193-25-000002",
+                "filing_url": "https://sec.gov/filing/002",
+                "cik": "0000320193",
             },
         ]
     }
@@ -301,8 +305,8 @@ async def test_get_sec_filing_with_mock(mock_get, mcp_server):
         assert data["ticker"] == "AAPL"
         assert data["filing_type"] == "10-K"
         assert data["count"] == 2
-        assert data["filings"][0]["id"] == "filing_001"
-        assert data["filings"][0]["type"] == "10-K"
+        assert data["filings"][0]["form_type"] == "10-K"
+        assert data["filings"][0]["accession_number"] is not None
         assert "retrieved_at" in data
 
 
@@ -310,10 +314,17 @@ async def test_get_sec_filing_with_mock(mock_get, mcp_server):
 @patch("mcp_massive.server.httpx.get")
 @pytest.mark.asyncio
 async def test_get_sec_filing_section_with_mock(mock_get, mcp_server):
-    """Test get_sec_filing_section returns parsed text."""
+    """Test get_sec_filing_section returns parsed section text."""
     mock_resp = MagicMock()
     mock_resp.json.return_value = {
-        "text": "The company faces significant risks including market volatility..."
+        "results": [
+            {
+                "ticker": "AAPL",
+                "section": "risk_factors",
+                "filing_date": "2026-02-01",
+                "text": "The company faces significant risks including market volatility...",
+            }
+        ]
     }
     mock_resp.raise_for_status = MagicMock()
     mock_get.return_value = mock_resp
@@ -322,15 +333,16 @@ async def test_get_sec_filing_section_with_mock(mock_get, mcp_server):
         result = await client.call_tool(
             "get_sec_filing_section",
             {
-                "filing_id": "filing_001",
+                "ticker": "AAPL",
                 "section": "risk_factors",
             },
         )
 
         data = json.loads(result.data)
-        assert data["filing_id"] == "filing_001"
+        assert data["ticker"] == "AAPL"
         assert data["section"] == "risk_factors"
-        assert "market volatility" in data["text"]
+        assert data["count"] == 1
+        assert "market volatility" in data["sections"][0]["text"]
         assert "retrieved_at" in data
 
 

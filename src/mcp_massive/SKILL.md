@@ -38,7 +38,8 @@ Common sections for `get_sec_filing_section`:
 - `mda` — Management's Discussion and Analysis
 - `financial_statements` — Financial statements
 
-First call `get_sec_filing` to get the filing ID, then `get_sec_filing_section` with that ID.
+`get_sec_filing_section` queries by ticker and section directly (no filing ID needed).
+Use `filing_type` to specify 10-K or 8-K. Returns the latest filing's section by default.
 
 ## Multi-Step Workflows
 
@@ -54,8 +55,7 @@ First call `get_sec_filing` to get the filing ID, then `get_sec_filing_section` 
 3. `get_technical_indicator(ticker, "rsi", window=14)` for RSI-14
 
 **"What are the risk factors for X?"**:
-1. `get_sec_filing(ticker, "10-K", limit=1)` to find the latest 10-K
-2. `get_sec_filing_section(filing_id, "risk_factors")` to read the text
+1. `get_sec_filing_section(ticker, "risk_factors")` to read the latest 10-K risk factors directly
 
 **"Company overview of X"**:
 1. `get_ticker_details(ticker)` for company info

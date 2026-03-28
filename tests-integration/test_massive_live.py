@@ -3,12 +3,21 @@ Live integration tests against the real Massive API (formerly Polygon.io).
 
 Requires MASSIVE_API_KEY in environment.
 Verifies URL construction, query params, and response parsing against the real API.
+
+Note: Snapshot and top movers endpoints require Starter tier ($29/mo).
+Tests for those are marked with starter_tier and will fail on free-tier keys.
 """
 
 import json
+import os
 
 import pytest
 from fastmcp import Client
+
+starter_tier = pytest.mark.skipif(
+    os.environ.get("MASSIVE_TIER", "free") != "starter",
+    reason="Requires Starter tier API key (set MASSIVE_TIER=starter to run)",
+)
 
 
 @pytest.mark.asyncio
@@ -39,9 +48,10 @@ async def test_get_candles_live(mcp_server):
         assert candle["high"] >= candle["low"]
 
 
+@starter_tier
 @pytest.mark.asyncio
 async def test_get_snapshot_live(mcp_server):
-    """get_snapshot returns current price data with day and prev_day."""
+    """get_snapshot returns current price data with day and prev_day (Starter tier)."""
     async with Client(mcp_server) as client:
         result = await client.call_tool("get_snapshot", {"ticker": "AAPL"})
 
@@ -130,9 +140,10 @@ async def test_get_ticker_details_live(mcp_server):
         assert data["sic_code"] is not None
 
 
+@starter_tier
 @pytest.mark.asyncio
 async def test_get_top_movers_live(mcp_server):
-    """get_top_movers returns a list of gainers with tickers and prices."""
+    """get_top_movers returns a list of gainers (Starter tier)."""
     async with Client(mcp_server) as client:
         result = await client.call_tool("get_top_movers", {"direction": "gainers"})
 
@@ -165,6 +176,7 @@ async def test_get_sec_filing_live(mcp_server):
         assert data["count"] > 0
 
         filing = data["filings"][0]
-        assert filing["id"] is not None
-        assert filing["type"] is not None
+        assert filing["form_type"] is not None
         assert filing["filing_date"] is not None
+        assert filing["accession_number"] is not None
+        assert filing["filing_url"] is not None

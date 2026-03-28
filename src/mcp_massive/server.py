@@ -249,25 +249,27 @@ def get_sec_filing(
 
     Args:
         ticker: Stock ticker symbol (e.g. AAPL)
-        filing_type: Filter by type: 10-K, 10-Q, 8-K, etc. (empty = all types)
+        filing_type: Filter by form type: 10-K, 10-Q, 8-K, etc. (empty = all types)
         limit: Max results to return (default 10)
     """
     try:
         params: dict = {"ticker": ticker.upper(), "limit": limit}
         if filing_type:
-            params["type"] = filing_type
+            params["form_type"] = filing_type
 
-        data = _request("/vX/reference/sec/filings", params)
+        data = _request("/stocks/filings/vX/index", params)
 
         filings = []
         for f in data.get("results", []):
             filings.append(
                 {
-                    "id": f.get("id"),
                     "ticker": f.get("ticker"),
+                    "issuer_name": f.get("issuer_name"),
+                    "form_type": f.get("form_type"),
                     "filing_date": f.get("filing_date"),
-                    "type": f.get("type"),
-                    "source_url": f.get("source_filing_url"),
+                    "accession_number": f.get("accession_number"),
+                    "filing_url": f.get("filing_url"),
+                    "cik": f.get("cik"),
                 }
             )
 
@@ -292,20 +294,41 @@ def get_sec_filing(
 
 
 @mcp.tool
-def get_sec_filing_section(filing_id: str, section: str) -> str:
+def get_sec_filing_section(
+    ticker: str,
+    section: str,
+    filing_type: str = "10-K",
+    limit: int = 1,
+) -> str:
     """Read a specific section of an SEC filing (AI-parsed text).
 
     Args:
-        filing_id: The filing ID from get_sec_filing results
+        ticker: Stock ticker symbol (e.g. AAPL)
         section: Section to read, e.g. risk_factors, business, mda, financial_statements
+        filing_type: Filing type: 10-K or 8-K (default: 10-K)
+        limit: Number of results (default 1 = latest filing)
     """
     try:
-        data = _request(f"/vX/reference/sec/filings/{filing_id}/sections/{section}")
+        path = f"/stocks/filings/{filing_type}/vX/sections"
+        data = _request(path, {"ticker": ticker.upper(), "section": section, "limit": limit})
+
+        sections = []
+        for s in data.get("results", []):
+            sections.append(
+                {
+                    "ticker": s.get("ticker"),
+                    "section": s.get("section"),
+                    "filing_date": s.get("filing_date"),
+                    "text": s.get("text", ""),
+                }
+            )
 
         result = {
-            "filing_id": filing_id,
+            "ticker": ticker.upper(),
             "section": section,
-            "text": data.get("text", ""),
+            "filing_type": filing_type,
+            "count": len(sections),
+            "sections": sections,
             "retrieved_at": datetime.now(UTC).isoformat(),
         }
         return json.dumps(result, indent=2)
@@ -313,8 +336,8 @@ def get_sec_filing_section(filing_id: str, section: str) -> str:
     except Exception as e:
         return json.dumps(
             {
-                "error": f"Error fetching section '{section}' for filing {filing_id}: {e}",
-                "filing_id": filing_id,
+                "error": f"Error fetching section '{section}' for {ticker}: {e}",
+                "ticker": ticker.upper(),
                 "timestamp": datetime.now(UTC).isoformat(),
             },
             indent=2,
