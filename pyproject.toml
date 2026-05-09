@@ -1,6 +1,6 @@
 [project]
 name = "mcp-massive"
-version = "0.1.1"
+version = "0.1.2"
 description = "Financial market data, technical indicators, and SEC filings MCP service powered by Massive API"
 readme = "README.md"
 license = {text = "MIT"}

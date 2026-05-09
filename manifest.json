@@ -1,7 +1,7 @@
 {
   "manifest_version": "0.4",
   "name": "@nimblebraininc/mcp-massive",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Financial market data, technical indicators, and SEC filings MCP service powered by Massive API",
   "author": {
     "name": "NimbleBrain Inc",
