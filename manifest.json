@@ -3,6 +3,7 @@
   "name": "@nimblebraininc/mcp-massive",
   "display_name": "Massive",
   "version": "0.1.3",
+  "license": "MIT",
   "description": "Financial market data, technical indicators, and SEC filings MCP service powered by Massive API",
   "author": {
     "name": "NimbleBrain Inc",
