@@ -1,6 +1,6 @@
 [project]
 name = "mcp-massive"
-version = "0.1.2"
+version = "0.2.0"
 description = "Financial market data, technical indicators, and SEC filings MCP service powered by Massive API"
 readme = "README.md"
 license = {text = "MIT"}
@@ -18,7 +18,7 @@ classifiers = [
     "Topic :: Office/Business :: Financial",
 ]
 dependencies = [
-    "fastmcp>=2.14.1",
+    "fastmcp>=4.0.0",
     "httpx>=0.28.0",
 ]
 
@@ -57,6 +57,10 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "--verbose",
+]
+# A deprecated MCP capability (logging, sampling, roots under SEP-2577) fails the suite.
+filterwarnings = [
+    "error::mcp.MCPDeprecationWarning",
 ]
 
 [tool.coverage.run]
